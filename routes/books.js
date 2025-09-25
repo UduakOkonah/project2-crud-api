@@ -20,6 +20,8 @@ const booksController = require("../controllers/booksController");
  *         - author
  *         - isbn
  *         - publishedDate
+ *         - genre
+ *         - rating
  *       properties:
  *         id:
  *           type: string
@@ -37,11 +39,20 @@ const booksController = require("../controllers/booksController");
  *           type: string
  *           format: date
  *           description: Date the book was published (YYYY-MM-DD)
+ *         genre:
+ *           type: string
+ *           description: Genre of the book
+ *         rating:
+ *           type: integer
+ *           format: int32
+ *           description: Rating of the book (1-5)
  *       example:
  *         title: The Great Gatsby
  *         author: F. Scott Fitzgerald
  *         isbn: "123-456789"
  *         publishedDate: "1925-04-10"
+ *         genre: Fiction
+ *         rating: 5
  */
 
 /**
@@ -62,6 +73,13 @@ const booksController = require("../controllers/booksController");
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/Book'
+ *           example:
+ *             title: To Kill a Mockingbird
+ *             author: Harper Lee
+ *             isbn: "987-654321"
+ *             publishedDate: "1960-07-11"
+ *             genre: Classic
+ *             rating: 5
  *     responses:
  *       201:
  *         description: Book created successfully
@@ -76,6 +94,7 @@ const booksController = require("../controllers/booksController");
  *         required: true
  *         schema:
  *           type: string
+ *         description: ID of the book to retrieve
  *     responses:
  *       200:
  *         description: Book found
@@ -88,15 +107,23 @@ const booksController = require("../controllers/booksController");
  *         required: true
  *         schema:
  *           type: string
+ *         description: ID of the book to update
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/Book'
+ *           example:
+ *             title: The Great Gatsby (Updated)
+ *             author: F. Scott Fitzgerald
+ *             isbn: "123-456789"
+ *             publishedDate: "1925-04-10"
+ *             genre: Classic Fiction
+ *             rating: 4
  *     responses:
  *       200:
- *         description: Book updated
+ *         description: Book updated successfully
  *   delete:
  *     summary: Delete a book by ID
  *     tags: [Books]
@@ -106,6 +133,7 @@ const booksController = require("../controllers/booksController");
  *         required: true
  *         schema:
  *           type: string
+ *         description: ID of the book to delete
  *     responses:
  *       200:
  *         description: Book deleted

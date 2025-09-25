@@ -9,7 +9,7 @@ Content-Type: application/json
 {
   "title": "The Great Gatsby",
   "author": "F. Scott Fitzgerald",
-  "isbn": "123-987654",
+  "isbn": "123-997654",
   "publishedDate": "1925-04-10",
   "genre": "Classic",
   "rating": 5
@@ -17,7 +17,7 @@ Content-Type: application/json
 
 
 ### Update a book (replace :id with actual MongoDB ObjectId)
-PUT http://localhost:8080/api/books/68d4ec5836b2b31a34c78653
+PUT http://localhost:8080/api/books/68d50ad79c0a90fcc84c7585
 Content-Type: application/json
 
 {
@@ -30,4 +30,4 @@ Content-Type: application/json
 }
 
 ### Delete a book (replace :id with actual MongoDB ObjectId)
-DELETE http://localhost:8080/api/books/68d4ec5836b2b31a34c78653
+DELETE http://localhost:8080/api/books/68d50ad79c0a90fcc84c7585
