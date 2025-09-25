@@ -1,0 +1,33 @@
+### Get all books
+GET http://localhost:8080/api/books
+Accept: application/json
+
+### Create a new book
+POST http://localhost:8080/api/books
+Content-Type: application/json
+
+{
+  "title": "The Great Gatsby",
+  "author": "F. Scott Fitzgerald",
+  "isbn": "123-987654",
+  "publishedDate": "1925-04-10",
+  "genre": "Classic",
+  "rating": 5
+}
+
+
+### Update a book (replace :id with actual MongoDB ObjectId)
+PUT http://localhost:8080/api/books/68d4ec5836b2b31a34c78653
+Content-Type: application/json
+
+{
+  "title": "Advanced MongoDB",
+  "author": "Jane Doe",
+  "year": 2025,
+  "isbn": "123-999999",
+  "genre": "Database",
+  "rating": 4
+}
+
+### Delete a book (replace :id with actual MongoDB ObjectId)
+DELETE http://localhost:8080/api/books/68d4ec5836b2b31a34c78653

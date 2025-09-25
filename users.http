@@ -1,0 +1,28 @@
+### Get all users
+GET http://localhost:8080/api/users
+Accept: application/json
+
+### Create a new user
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+  "name": "Uduak Okonah",
+  "email": "udokonah@example.com",
+  "age": 21,
+  "role": "user"
+}
+
+### Update a user (replace :id with actual MongoDB ObjectId)
+PUT http://localhost:8080/api/users/68d4ee1636b2b31a34c78663
+Content-Type: application/json
+
+{
+  "name": "Akpo Margaret",
+  "email": "makpo@example.com",
+  "age": 22,
+  "role": "admin"
+}
+
+### Delete a user (replace :id with actual MongoDB ObjectId)
+DELETE http://localhost:8080/api/users/68d4ee1636b2b31a34c78663
