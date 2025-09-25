@@ -26,12 +26,20 @@ const options = {
       version: "1.0.0",
       description: "CRUD API with Users and Books",
     },
-    servers: [{ url: "http://localhost:" + PORT + "/api" }],
+    servers: [
+      { url: `http://localhost:${PORT}/api` },
+      { url: "https://project2-crud-api.onrender.com/api" }
+    ],
   },
   apis: ["./routes/*.js"],
 };
 const swaggerSpec = swaggerJsdoc(options);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+// Root route
+app.get("/", (req, res) => {
+  res.send("🚀 Welcome to Project 2 CRUD API! Visit /api-docs for Swagger documentation.");
+});
 
 // Routes
 app.use("/api/users", usersRouter);
