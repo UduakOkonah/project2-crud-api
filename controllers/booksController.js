@@ -1,70 +1,51 @@
+// controllers/booksController.js
 const Book = require("../models/book");
 
-// ✅ GET all books
-exports.getBooks = async (req, res) => {
+exports.getBooks = async (req, res, next) => {
   try {
     const books = await Book.find();
-    res.status(200).json(books);
+    res.json(books);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
-// ✅ GET one book
-exports.getBook = async (req, res) => {
+exports.getBook = async (req, res, next) => {
   try {
     const book = await Book.findById(req.params.id);
     if (!book) return res.status(404).json({ error: "Book not found" });
-    res.status(200).json(book);
+    res.json(book);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
-// ✅ CREATE book
-exports.createBook = async (req, res) => {
+exports.createBook = async (req, res, next) => {
   try {
-    const { title, author, isbn, publishedDate, genre, rating } = req.body;
-    if (!title || !author || !isbn || !publishedDate || !genre) {
-      return res.status(400).json({ error: "All required fields must be provided" });
-    }
-    const book = new Book({ title, author, isbn, publishedDate, genre, rating });
-    const savedBook = await book.save();
-    res.status(201).json(savedBook);
+    const book = new Book(req.body);
+    await book.save();
+    res.status(201).json(book);
   } catch (err) {
-    if (err.code === 11000) {
-      return res.status(400).json({ error: "ISBN must be unique" });
-    }
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
-// ✅ UPDATE book
-exports.updateBook = async (req, res) => {
+exports.updateBook = async (req, res, next) => {
   try {
-    const { title, author, isbn, publishedDate, genre, rating } = req.body;
-    const updatedBook = await Book.findByIdAndUpdate(
-      req.params.id,
-      { title, author, isbn, publishedDate, genre, rating },
-      { new: true, runValidators: true }
-    );
-    if (!updatedBook) return res.status(404).json({ error: "Book not found" });
-    res.status(200).json(updatedBook);
+    const book = await Book.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!book) return res.status(404).json({ error: "Book not found" });
+    res.json(book);
   } catch (err) {
-    if (err.code === 11000) {
-      return res.status(400).json({ error: "ISBN must be unique" });
-    }
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
-// ✅ DELETE book
-exports.deleteBook = async (req, res) => {
+exports.deleteBook = async (req, res, next) => {
   try {
-    const deletedBook = await Book.findByIdAndDelete(req.params.id);
-    if (!deletedBook) return res.status(404).json({ error: "Book not found" });
-    res.status(200).json({ message: "Book deleted successfully" });
+    const book = await Book.findByIdAndDelete(req.params.id);
+    if (!book) return res.status(404).json({ error: "Book not found" });
+    res.json({ message: "Book deleted" });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };

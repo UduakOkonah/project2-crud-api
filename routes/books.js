@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const booksController = require("../controllers/booksController");
+const booksController = require("../controllers/booksController.js");
+const Joi = require("joi");
+const { requireAuth, requireRole } = require("../middleware/auth");
 
 /**
  * @swagger
@@ -55,6 +57,15 @@ const booksController = require("../controllers/booksController");
  *         rating: 5
  */
 
+const bookSchema = Joi.object({
+  title: Joi.string().min(3).required(),
+  author: Joi.string().min(3).required(),
+  isbn: Joi.string().min(5).required(),
+  publishedDate: Joi.date().iso().required(),
+  genre: Joi.string().min(3).required(),
+  rating: Joi.number().integer().min(1).max(5).required(),
+});
+
 /**
  * @swagger
  * /books:
@@ -65,7 +76,9 @@ const booksController = require("../controllers/booksController");
  *       200:
  *         description: List of books
  *   post:
- *     summary: Create a new book
+ *     summary: Create a new book (requires authentication)
+ *     security:
+ *       - bearerAuth: []
  *     tags: [Books]
  *     requestBody:
  *       required: true
@@ -73,13 +86,6 @@ const booksController = require("../controllers/booksController");
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/Book'
- *           example:
- *             title: To Kill a Mockingbird
- *             author: Harper Lee
- *             isbn: "987-654321"
- *             publishedDate: "1960-07-11"
- *             genre: Classic
- *             rating: 5
  *     responses:
  *       201:
  *         description: Book created successfully
@@ -94,12 +100,13 @@ const booksController = require("../controllers/booksController");
  *         required: true
  *         schema:
  *           type: string
- *         description: ID of the book to retrieve
  *     responses:
  *       200:
  *         description: Book found
  *   put:
- *     summary: Update a book by ID
+ *     summary: Update a book by ID (requires authentication)
+ *     security:
+ *       - bearerAuth: []
  *     tags: [Books]
  *     parameters:
  *       - in: path
@@ -107,25 +114,19 @@ const booksController = require("../controllers/booksController");
  *         required: true
  *         schema:
  *           type: string
- *         description: ID of the book to update
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/Book'
- *           example:
- *             title: The Great Gatsby (Updated)
- *             author: F. Scott Fitzgerald
- *             isbn: "123-456789"
- *             publishedDate: "1925-04-10"
- *             genre: Classic Fiction
- *             rating: 4
  *     responses:
  *       200:
  *         description: Book updated successfully
  *   delete:
- *     summary: Delete a book by ID
+ *     summary: Delete a book by ID (admin only)
+ *     security:
+ *       - bearerAuth: []
  *     tags: [Books]
  *     parameters:
  *       - in: path
@@ -133,7 +134,6 @@ const booksController = require("../controllers/booksController");
  *         required: true
  *         schema:
  *           type: string
- *         description: ID of the book to delete
  *     responses:
  *       200:
  *         description: Book deleted
@@ -141,8 +141,36 @@ const booksController = require("../controllers/booksController");
 
 router.get("/", booksController.getBooks);
 router.get("/:id", booksController.getBook);
-router.post("/", booksController.createBook);
-router.put("/:id", booksController.updateBook);
-router.delete("/:id", booksController.deleteBook);
+
+// ✅ Protected & validated create
+router.post("/", requireAuth, async (req, res, next) => {
+  try {
+    const { error } = bookSchema.validate(req.body);
+    if (error) return res.status(400).json({ error: error.details[0].message });
+    const newBook = await booksController.createBook(req, res);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ✅ Protected & validated update
+router.put("/:id", requireAuth, async (req, res, next) => {
+  try {
+    const { error } = bookSchema.validate(req.body);
+    if (error) return res.status(400).json({ error: error.details[0].message });
+    const updatedBook = await booksController.updateBook(req, res);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ✅ Admin-only delete
+router.delete("/:id", requireAuth, requireRole("admin"), async (req, res, next) => {
+  try {
+    const deleted = await booksController.deleteBook(req, res);
+  } catch (err) {
+    next(err);
+  }
+});
 
 module.exports = router;

@@ -1,4 +1,6 @@
 const User = require("../models/user");
+const bcrypt = require("bcryptjs");
+const { signUser } = require("../utils/jwt");
 
 // ✅ GET all users
 exports.getUsers = async (req, res) => {
@@ -24,17 +26,26 @@ exports.getUser = async (req, res) => {
 // ✅ CREATE user
 exports.createUser = async (req, res) => {
   try {
-    const { name, email, age, role } = req.body;
-    if (!name || !email || !age) {
-      return res.status(400).json({ error: "Name, email, and age are required" });
+    const data = req.body.validated || req.body; // use validated data from router if present
+
+    // Hash password if provided (manual registration)
+    if (data.password) {
+      const salt = await bcrypt.genSalt(10);
+      data.password = await bcrypt.hash(data.password, salt);
     }
-    const user = new User({ name, email, age, role });
-    const savedUser = await user.save();
-    res.status(201).json(savedUser);
+
+    const user = new User(data);
+    await user.save();
+
+    // Generate JWT
+    const token = signUser(user);
+
+    res.status(201).json({
+      token,
+      user: { id: user._id, email: user.email, name: user.name, role: user.role },
+    });
   } catch (err) {
-    if (err.code === 11000) {
-      return res.status(400).json({ error: "Email must be unique" });
-    }
+    console.error("🔥 createUser error:", err);
     res.status(500).json({ error: err.message });
   }
 };
