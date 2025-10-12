@@ -51,34 +51,35 @@ exports.createUser = async (req, res) => {
 };
 
 // ✅ UPDATE user (with debug logs)
-exports.updateUser = async (req, res) => {
-  try {
-    console.log("➡️ PUT /api/users/" + req.params.id + " received");
-    console.log("➡️ Body:", req.body);
+  exports.updateUser = async (req, res) => {
+    try {
+      console.log("➡️ PUT /api/users/" + req.params.id + " received");
+      console.log("➡️ Body:", req.body);
 
-    const { name, email, age } = req.body;
+      // include role now
+      const { name, email, age, role } = req.body;
 
-    const updatedUser = await User.findByIdAndUpdate(
-      req.params.id,
-      { name, email, age },
-      { new: true, runValidators: true }
-    );
+      const updatedUser = await User.findByIdAndUpdate(
+        req.params.id,
+        { name, email, age, role }, // update role too
+        { new: true, runValidators: true }
+      );
 
-    if (!updatedUser) {
-      console.log("❌ No user found for id:", req.params.id);
-      return res.status(404).json({ error: "User not found" });
+      if (!updatedUser) {
+        console.log("❌ No user found for id:", req.params.id);
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      console.log("✅ Updated user:", updatedUser);
+      return res.status(200).json(updatedUser);
+    } catch (err) {
+      console.error("🔥 updateUser error:", err);
+      if (err.code === 11000) {
+        return res.status(400).json({ error: "Email must be unique" });
+      }
+      return res.status(500).json({ error: err.message });
     }
-
-    console.log("✅ Updated user:", updatedUser);
-    return res.status(200).json(updatedUser);
-  } catch (err) {
-    console.error("🔥 updateUser error:", err);
-    if (err.code === 11000) {
-      return res.status(400).json({ error: "Email must be unique" });
-    }
-    return res.status(500).json({ error: err.message });
-  }
-};
+  };
 
 
 

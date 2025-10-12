@@ -169,16 +169,26 @@ router.post("/", async (req, res, next) => {
   }
 });
 
-// Update user
+// Update schema (password optional)
+const updateUserSchema = Joi.object({
+  name: Joi.string().min(3).optional(),
+  email: Joi.string().email().optional(),
+  age: Joi.number().integer().min(1).optional(),
+  role: Joi.string().valid("user", "admin").optional(),
+  password: Joi.string().min(8).optional(),
+});
+
 router.put("/:id", requireAuth, async (req, res, next) => {
   try {
-    const { error } = manualUserSchema.validate(req.body);
+    const { error, value } = updateUserSchema.validate(req.body);
     if (error) return res.status(400).json({ error: error.details[0].message });
-    await usersController.updateUser(req, res);
+    
+    await usersController.updateUser(req, res, value); // pass validated data
   } catch (err) {
     next(err);
   }
 });
+
 
 // Admin-only delete
 router.delete("/:id", requireAuth, requireRole("admin"), async (req, res, next) => {

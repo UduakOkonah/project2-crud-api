@@ -142,35 +142,40 @@ const bookSchema = Joi.object({
 router.get("/", booksController.getBooks);
 router.get("/:id", booksController.getBook);
 
-// ✅ Protected & validated create
+// Protected & validated create
 router.post("/", requireAuth, async (req, res, next) => {
   try {
     const { error } = bookSchema.validate(req.body);
     if (error) return res.status(400).json({ error: error.details[0].message });
-    const newBook = await booksController.createBook(req, res);
+    
+    // Pass next
+    await booksController.createBook(req, res, next);
   } catch (err) {
     next(err);
   }
 });
 
-// ✅ Protected & validated update
+// Protected & validated update
 router.put("/:id", requireAuth, async (req, res, next) => {
   try {
     const { error } = bookSchema.validate(req.body);
     if (error) return res.status(400).json({ error: error.details[0].message });
-    const updatedBook = await booksController.updateBook(req, res);
+    
+    // Pass next
+    await booksController.updateBook(req, res, next);
   } catch (err) {
     next(err);
   }
 });
 
-// ✅ Admin-only delete
+// Admin-only delete
 router.delete("/:id", requireAuth, requireRole("admin"), async (req, res, next) => {
   try {
-    const deleted = await booksController.deleteBook(req, res);
+    await booksController.deleteBook(req, res, next);
   } catch (err) {
     next(err);
   }
 });
+
 
 module.exports = router;
