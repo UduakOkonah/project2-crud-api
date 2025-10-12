@@ -2,7 +2,7 @@ const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const User = require("../models/user");
 const { signUser } = require("../utils/jwt");
 
-module.exports = function (passport) {
+module.exports = (passport) => {
   passport.use(
     new GoogleStrategy(
       {
@@ -15,16 +15,17 @@ module.exports = function (passport) {
           // Find or create user
           let user = await User.findOne({ email: profile.emails[0].value });
           if (!user) {
-            user = await User.create({
+            user = new User({
               email: profile.emails[0].value,
               username: profile.displayName,
-              password: "googleoauth", // placeholder password
+              password: Math.random().toString(36).slice(-8), // temporary password
               role: "user",
             });
+            await user.save();
           }
-          done(null, user);
+          return done(null, user);
         } catch (err) {
-          done(err, null);
+          return done(err, null);
         }
       }
     )
